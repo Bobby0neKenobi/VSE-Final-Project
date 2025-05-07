@@ -10,6 +10,15 @@ export default function Sidebar() {
       >
         Resistor
       </div>
+      <div
+        draggable
+        onDragStart={(event) =>
+          event.dataTransfer.setData("application/reactflow", "battery")
+        }
+        className="p-[10px] bg-[#e2e8f0] mb-[10px] cursor-grab rounded-[5px]"
+      >
+        Battery
+      </div>
     </div>
   );
 }

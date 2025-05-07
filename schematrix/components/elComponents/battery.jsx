@@ -1,45 +1,46 @@
 import { useEffect, useState } from "react";
 import { Handle, Position } from "reactflow";
 
-export default function ResistorNode({ data, selected, id }) {
+export default function BatteryNode({ data, selected, id }) {
   const [value, setValue] = useState(data.value || 100);
   const { direction } = data;
 
-  useEffect(() => {setTimeout(() => {
-    data.setEdges((edges) =>
-      edges.map((edge) => {
-        let newSourceHandle = edge.sourceHandle;
-        let newTargetHandle = edge.targetHandle;
+  useEffect(() => {
+    setTimeout(() => {
+      data.setEdges((edges) =>
+        edges.map((edge) => {
+          let newSourceHandle = edge.sourceHandle;
+          let newTargetHandle = edge.targetHandle;
 
-        if (edge.source === id) {
-          newSourceHandle = direction ?
-            edge.sourceHandle === "rs"
-              ? "bs"
-              : "ts"
+          if (edge.source === id) {
+            newSourceHandle = direction
+              ? edge.sourceHandle === "rs"
+                ? "bs"
+                : "ts"
               : edge.sourceHandle === "ts"
               ? "ls"
               : "rs";
-        }
+          }
 
-        if (edge.target === id) {
-          newTargetHandle = direction ?
-            edge.targetHandle === "rt"
-              ? "bt"
-              : "tt"
+          if (edge.target === id) {
+            newTargetHandle = direction
+              ? edge.targetHandle === "rt"
+                ? "bt"
+                : "tt"
               : edge.targetHandle === "tt"
               ? "lt"
               : "rt";
-        }
+          }
 
-        return {
-          ...edge,
-          sourceHandle: newSourceHandle,
-          targetHandle: newTargetHandle,
-        };
-      })
-    );
-  }, 1000);
-  }, [direction])
+          return {
+            ...edge,
+            sourceHandle: newSourceHandle,
+            targetHandle: newTargetHandle,
+          };
+        })
+      );
+    }, 1000);
+  }, [direction]);
 
   return (
     <div
@@ -49,7 +50,7 @@ export default function ResistorNode({ data, selected, id }) {
           : "relative p-[10px] border-2 border-[#000] rounded-[5px] bg-[#e5e6e8] min-w-[120px] text-center"
       }
     >
-      <strong>Resistor</strong>
+      <strong>Battery</strong>
       <div className="mt-[6px]">
         <input
           type="number"
@@ -57,7 +58,7 @@ export default function ResistorNode({ data, selected, id }) {
           onChange={(e) => setValue(Number(e.target.value))}
           className="w-[60px] p-[4px] text-[14px] mr-[4px] text-center"
         />
-        Ω
+        V
       </div>
       {selected && (
         <div

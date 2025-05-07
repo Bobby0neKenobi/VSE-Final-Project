@@ -7,10 +7,11 @@ export default function SidebarButton({ setShowSidebar }) {
       showZoom={false}
       showFitView={false}
       showInteractive={false}
+      style={{ borderRadius: "8px" }}
     >
       <button
         onClick={() => setShowSidebar((prev) => !prev)}
-        className="rounded-4xl"
+        className="bg-[#FFF] hover:bg-[#f3f3f3]"
       >
         |||
       </button>

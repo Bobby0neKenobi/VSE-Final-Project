@@ -6,13 +6,15 @@ import ReactFlow, {
   useEdgesState,
   useReactFlow,
 } from "reactflow";
-import SidebarButton from "./sidebarButton";
-import Sidebar from "./sidebar";
-import ResistorNode from "./elComponents/resistor";
+import SidebarButton from "../../components/sidebarButton";
+import Sidebar from "../../components/sidebar";
+import ResistorNode from "../../components/elComponents/resistor";
 import { useCallback, useEffect, useState } from "react";
+import BatteryNode from "../../components/elComponents/battery";
 
 const nodeTypes = {
   resistor: ResistorNode,
+  battery: BatteryNode,
 };
 
 const initialNodes = [];
@@ -27,7 +29,7 @@ export default function FlowEditor() {
     edges: [],
   });
   const [showSidebar, setShowSidebar] = useState(false);
-
+  console.log(edges);
   useEffect(() => {
     window.focus();
   }, []);
@@ -53,7 +55,7 @@ export default function FlowEditor() {
         id: `${+new Date()}`,
         type,
         position,
-        data: { label: `${type} node`, value: 100, setNodes },
+        data: { label: `${type} node`, value: 100, setNodes, setEdges },
       };
 
       setNodes((nds) => [...nds, newNode]);
