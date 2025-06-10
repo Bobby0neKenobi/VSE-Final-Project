@@ -41,7 +41,8 @@ def calculate_total_resistance(nodes, edges):
                         continue
                     Rn = (Rn * R)/(Rn + R)
             else:
-                Rn = nodes[int(graphtarg[graphtarg[node_id][0]][0])]["data"]["value"]
+                Rn = nodes[next((i for i, node in enumerate(nodes) if node["id"] == graphtarg[graphtarg[node_id][0]][0]), -1)]["data"]["value"]
+
 
             # Calc resistor sum
             Res = Res + Rn

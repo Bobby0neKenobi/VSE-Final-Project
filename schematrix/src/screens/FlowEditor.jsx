@@ -69,73 +69,6 @@ function isCircuitComplete(nodes, edges) {
   return valid;
 }
 
-function calculateCurrent(nodes, edges) {
-  let batteryNode = nodes.find((node) => node.type === "battery");
-  if (!batteryNode) {
-    return
-  }
-
-  const voltage = batteryNode.data?.value;
-  if (typeof voltage !== "number") {
-    throw new Error("Battery node has no voltage value");
-  }
-  const resistorNodes = nodes.filter((node) => node.type === "resistor");
-  const totalResistance = resistorNodes.reduce((sum, node) => {
-    const resistance = Number(node.data?.value);
-    return sum + (isNaN(resistance) ? 0 : resistance);
-  }, 0);
-
-  if (totalResistance === 0) {
-    throw new Error("Total resistance is zero or missing");
-  }
-  const current = voltage / totalResistance;
-  return current;
-}
-
-function calculateTotalResistance(nodes, edges){
-  let battery = nodes.find((node) => node.type === "battery");
-  if (!battery) {
-    return 0;
-  }
-  const posHandle = battery.id;
-  const negHandle = battery.id;
-  const graph = {};
-  let length = 0;
-  edges.forEach((edge) => {
-    const a = edge.source;
-    const b = edge.target;
-    if (!graph[a]){graph[a] = []; length ++;}
-    if (!graph[b]){graph[b] = []; length ++;}
-    graph[a].push(b);
-    graph[b].push(a);
-  });
-  console.log(graph)
-  const visited = new Set();
-  let foundResistor = false;
-  let valid = false;
-
-  function dfs(nodeId, cameFrom) {
-    
-    if (nodeId === negHandle && foundResistor) {
-      valid = true;
-      return;
-    }
-    if (visited.has(nodeId)) return;
-    visited.add(nodeId);
-
-    const node = nodes.find((n) => n.id === nodeId);
-    
-    if (node && node.type === "resistor") foundResistor = true;
-
-    for (const neighbor of graph[nodeId] || []) {
-      if (neighbor !== cameFrom || length === 2) dfs(neighbor, nodeId);
-    }
-  }
-
-  dfs(posHandle, null);
-  return valid;
-}
-
 
 
 export default function FlowEditor() {
@@ -161,22 +94,6 @@ export default function FlowEditor() {
   useEffect(() => {
     window.focus();
   }, []);
-
-  useEffect(() => {
-    if (isCircuitComplete(nodes, edges)) {
-      console.log("Complete!!!");
-      let I = calculateCurrent(nodes, edges);
-      console.log(I);
-      let R = calculateTotalResistance(nodes, edges);
-      console.log(R);
-      // setEdges((current) =>
-      //   current.map((edge) => ({
-      //     ...edge,
-      //     label: `I = ${I.toFixed(2)}A`,
-      //   }))
-      // );
-    }
-  }, [nodes, edges]);
 
   const onConnect = useCallback(
     (params) =>
@@ -329,7 +246,7 @@ export default function FlowEditor() {
   };
 
   return (
-    <FlowContext.Provider value={{ setNodes, setEdges, setSelectedElements }}>
+    <FlowContext.Provider value={{ edges, nodes, setNodes, setEdges, setSelectedElements, isCircuitComplete }}>
       <div className="flex w-screen h-screen">
         {showSidebar && <Sidebar />}
         <div

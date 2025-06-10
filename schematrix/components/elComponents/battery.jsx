@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Handle, Position } from "reactflow";
+import { FlowContext } from "../../context/FlowContext";
 
 export default function BatteryNode({ data, selected, id }) {
   const [value, setValue] = useState(data.value || 100);
+  const { nodes, edges, setNodes, setEdges, setSelectedElements } = useContext(FlowContext);
 
   return (
     <div

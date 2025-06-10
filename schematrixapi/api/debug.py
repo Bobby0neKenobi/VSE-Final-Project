@@ -27,13 +27,13 @@ def calculate_total_resistance(nodes, edges):
                     if Rn == 0:
                         Rn = R
                         continue
-                    Rn = (Rn * R)/(Rn + R)
+                    Rn = (Rn * R) / (Rn + R)
             else:
-                Rn = nodes[int(graphtarg[graphtarg[node_id][0]][0])]["data"]["value"]
+                Rn = nodes[next((i for i, node in enumerate(nodes) if node["id"] == graphtarg[graphtarg[node_id][0]][0]), -1)]["data"]["value"]
 
             # Calc resistor sum
             Res = Res + Rn
-            
+
             if len(visited) == len(nodes):
                 break
             else:
@@ -49,7 +49,7 @@ def calculate_total_resistance(nodes, edges):
 data = {
     "nodes": [
         {
-            "id": "1",
+            "id": "1747826606105",
             "type": "resistor",
             "position": {"x": 593.109375, "y": 273},
             "data": {"label": "resistor node", "value": 100},
@@ -57,7 +57,7 @@ data = {
             "height": 82,
         },
         {
-            "id": "2",
+            "id": "1747826616037",
             "type": "resistor",
             "position": {"x": 392.6640625, "y": 189.75},
             "data": {"label": "resistor node", "value": 100},
@@ -65,18 +65,18 @@ data = {
             "height": 82,
         },
         {
-            "id": "4",
+            "id": "1748438128985",
             "type": "resistor",
             "position": {"x": 234.53647105012885, "y": 304.4087955182405},
             "data": {"label": "resistor node", "value": 100},
             "width": 120,
             "height": 82,
-            "selected": False,
+            "selected": 0,
             "positionAbsolute": {"x": 234.53647105012885, "y": 304.4087955182405},
-            "dragging": False,
+            "dragging": 0,
         },
         {
-            "id": "3",
+            "id": "1749042654421",
             "type": "battery",
             "position": {"x": 462.6227954571734, "y": 485.8626560489172},
             "data": {"label": "battery node", "value": 100},
@@ -84,9 +84,9 @@ data = {
             "height": 82,
         },
         {
-            "id": "5",
+            "id": "1749586502163",
             "type": "resistor",
-            "position": {"x": 392.6640625, "y": 189.75},
+            "position": {"x": 445.25459614895067, "y": 345.93597114884454},
             "data": {"label": "resistor node", "value": 100},
             "width": 120,
             "height": 82,
@@ -94,52 +94,52 @@ data = {
     ],
     "edges": [
         {
-            "source": "2",
-            "sourceHandle": "rs",
-            "target": "1",
-            "targetHandle": "lt",
-            "type": "smoothstep",
-            "id": "reactflow__edge-2rs-1lt",
-        },
-        {
-            "source": "3",
-            "sourceHandle": "rs",
-            "target": "2",
-            "targetHandle": "lt",
-            "type": "smoothstep",
-            "id": "reactflow__edge-3rs-2lt",
-        },
-        {
-            "source": "4",
+            "source": "1749042654421",
             "sourceHandle": "ls",
-            "target": "3",
+            "target": "1748438128985",
             "targetHandle": "lt",
             "type": "smoothstep",
-            "id": "reactflow__edge-3ls-4lt",
+            "id": "reactflow__edge-1749042654421ls-1748438128985lt",
         },
         {
-            "source": "1",
+            "source": "1748438128985",
             "sourceHandle": "rs",
-            "target": "4",
-            "targetHandle": "rt",
+            "target": "1747826616037",
+            "targetHandle": "lt",
             "type": "smoothstep",
-            "id": "reactflow__edge-4rs-1rt",
+            "id": "reactflow__edge-1748438128985rs-1747826616037lt",
         },
         {
-            "source": "2",
+            "source": "1748438128985",
             "sourceHandle": "rs",
-            "target": "5",
-            "targetHandle": "rt",
+            "target": "1749586502163",
+            "targetHandle": "lt",
             "type": "smoothstep",
-            "id": "reactflow__edge-4rs-1rt",
+            "id": "reactflow__edge-1748438128985rs-1749586502163lt",
         },
         {
-            "source": "5",
+            "source": "1747826616037",
             "sourceHandle": "rs",
-            "target": "3",
+            "target": "1747826606105",
+            "targetHandle": "lt",
+            "type": "smoothstep",
+            "id": "reactflow__edge-1747826616037rs-1747826606105lt",
+        },
+        {
+            "source": "1749586502163",
+            "sourceHandle": "rs",
+            "target": "1749042654421",
             "targetHandle": "rt",
             "type": "smoothstep",
-            "id": "reactflow__edge-4rs-1rt",
+            "id": "reactflow__edge-1749586502163rs-1749042654421rt",
+        },
+        {
+            "source": "1747826606105",
+            "sourceHandle": "rs",
+            "target": "1749042654421",
+            "targetHandle": "rt",
+            "type": "smoothstep",
+            "id": "reactflow__edge-1747826606105rs-1749042654421rt",
         },
     ],
 }

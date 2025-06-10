@@ -4,8 +4,7 @@ import { FlowContext } from "../../context/FlowContext";
 
 export default function ResistorNode({ data, selected, id }) {
   const [value, setValue] = useState(data.value || 100);
-  const { direction } = data;
-  const { setNodes, setEdges, setSelectedElements } = useContext(FlowContext);
+  const { nodes, edges, setNodes, setEdges, setSelectedElements } = useContext(FlowContext);
 
   return (
     <div
