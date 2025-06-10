@@ -15,12 +15,12 @@ export default function BatteryNode({ data, selected, id }) {
       }
     >
       <strong>+ Battery -</strong>
-      <div className="mt-[6px]">
+      <div className="mt-[6px]"
+        onClick={() => {setSelectedElements({nodes: [], edges: []})}}>
         <input
-        onClick={() => {data.setSelectedElements({nodes: [], edges: []})}}
           type="text"
           value={value}
-          onChange={(e) => setValue(Number(e.target.value))}
+          onChange={(e) => setValue(Math.max(1, Number(e.target.value)))}
           className="w-[60px] p-[4px] text-[14px] mr-[4px] text-center"
         />
         V
