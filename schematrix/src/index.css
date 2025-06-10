@@ -5,7 +5,8 @@
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
+  
+  width: 100vw;
   color-scheme: light;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
@@ -25,14 +26,25 @@ a:hover {
   color: #535bf2;
 }
 
-body {
+
+html,body {
   margin: 0;
-  display: flex;
+  padding: 0;
   place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
   background-color: white;
   color: black;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+body{
+  overflow-x: hidden;
 }
 
 h1 {

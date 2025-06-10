@@ -1,4 +1,5 @@
-import ReactFlow, {
+import {
+  ReactFlow,
   Background,
   Controls,
   addEdge,
@@ -9,8 +10,14 @@ import ReactFlow, {
 import SidebarButton from "../../components/sidebarButton";
 import Sidebar from "../../components/sidebar";
 import ResistorNode from "../../components/elComponents/resistor";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import BatteryNode from "../../components/elComponents/battery";
+import { useLocation, useNavigate } from "react-router-dom";
+import HomeButton from "../../components/homeButton";
+import GraphName from "../../components/graphName";
+import SaveButton from "../../components/saveButton";
+import domtoimage from "dom-to-image-more";
+import { FlowContext } from "../../context/FlowContext";
 
 const nodeTypes = {
   resistor: ResistorNode,
@@ -20,7 +27,125 @@ const nodeTypes = {
 const initialNodes = [];
 const initialEdges = [];
 
+function isCircuitComplete(nodes, edges) {
+  const battery = nodes.find((n) => n.type === "battery");
+  if (!battery) return false;
+
+  const posHandle = battery.id;
+  const negHandle = battery.id;
+  const graph = {};
+  let length = 0;
+  edges.forEach((edge) => {
+    const a = edge.source;
+    const b = edge.target;
+    if (!graph[a]){graph[a] = []; length ++;}
+    if (!graph[b]){graph[b] = []; length ++;}
+    graph[a].push(b);
+    graph[b].push(a);
+  });
+  const visited = new Set();
+  let foundResistor = false;
+  let valid = false;
+
+  function dfs(nodeId, cameFrom) {
+    
+    if (nodeId === negHandle && foundResistor) {
+      valid = true;
+      return;
+    }
+    if (visited.has(nodeId)) return;
+    visited.add(nodeId);
+
+    const node = nodes.find((n) => n.id === nodeId);
+    
+    if (node && node.type === "resistor") foundResistor = true;
+
+    for (const neighbor of graph[nodeId] || []) {
+      if (neighbor !== cameFrom || length === 2) dfs(neighbor, nodeId);
+    }
+  }
+
+  dfs(posHandle, null);
+  return valid;
+}
+
+function calculateCurrent(nodes, edges) {
+  let batteryNode = nodes.find((node) => node.type === "battery");
+  if (!batteryNode) {
+    return
+  }
+
+  const voltage = batteryNode.data?.value;
+  if (typeof voltage !== "number") {
+    throw new Error("Battery node has no voltage value");
+  }
+  const resistorNodes = nodes.filter((node) => node.type === "resistor");
+  const totalResistance = resistorNodes.reduce((sum, node) => {
+    const resistance = Number(node.data?.value);
+    return sum + (isNaN(resistance) ? 0 : resistance);
+  }, 0);
+
+  if (totalResistance === 0) {
+    throw new Error("Total resistance is zero or missing");
+  }
+  const current = voltage / totalResistance;
+  return current;
+}
+
+function calculateTotalResistance(nodes, edges){
+  let battery = nodes.find((node) => node.type === "battery");
+  if (!battery) {
+    return 0;
+  }
+  const posHandle = battery.id;
+  const negHandle = battery.id;
+  const graph = {};
+  let length = 0;
+  edges.forEach((edge) => {
+    const a = edge.source;
+    const b = edge.target;
+    if (!graph[a]){graph[a] = []; length ++;}
+    if (!graph[b]){graph[b] = []; length ++;}
+    graph[a].push(b);
+    graph[b].push(a);
+  });
+  console.log(graph)
+  const visited = new Set();
+  let foundResistor = false;
+  let valid = false;
+
+  function dfs(nodeId, cameFrom) {
+    
+    if (nodeId === negHandle && foundResistor) {
+      valid = true;
+      return;
+    }
+    if (visited.has(nodeId)) return;
+    visited.add(nodeId);
+
+    const node = nodes.find((n) => n.id === nodeId);
+    
+    if (node && node.type === "resistor") foundResistor = true;
+
+    for (const neighbor of graph[nodeId] || []) {
+      if (neighbor !== cameFrom || length === 2) dfs(neighbor, nodeId);
+    }
+  }
+
+  dfs(posHandle, null);
+  return valid;
+}
+
+
+
 export default function FlowEditor() {
+  const navigate = useNavigate();
+
+  const location = useLocation();
+  const { id, name, initialNodes, initialEdges } = location.state || {};
+  if (id === undefined) {
+    navigate("/");
+  }
   const { project } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -28,15 +153,36 @@ export default function FlowEditor() {
     nodes: [],
     edges: [],
   });
+  const [graphName, setGraphName] = useState(name);
   const [showSidebar, setShowSidebar] = useState(false);
-  console.log(edges);
+  const ref = useRef();
+  console.log(nodes, edges)
+
   useEffect(() => {
     window.focus();
   }, []);
 
+  useEffect(() => {
+    if (isCircuitComplete(nodes, edges)) {
+      console.log("Complete!!!");
+      let I = calculateCurrent(nodes, edges);
+      console.log(I);
+      let R = calculateTotalResistance(nodes, edges);
+      console.log(R);
+      // setEdges((current) =>
+      //   current.map((edge) => ({
+      //     ...edge,
+      //     label: `I = ${I.toFixed(2)}A`,
+      //   }))
+      // );
+    }
+  }, [nodes, edges]);
+
   const onConnect = useCallback(
     (params) =>
-      setEdges((eds) => addEdge({ ...params, type: "smoothstep" }, eds)),
+      setEdges((eds) =>
+        addEdge({ ...params, type: "smoothstep" /*, label: "I = "*/ }, eds)
+      ),
     []
   );
 
@@ -55,7 +201,7 @@ export default function FlowEditor() {
         id: `${+new Date()}`,
         type,
         position,
-        data: { label: `${type} node`, value: 100, setNodes, setEdges },
+        data: { label: `${type} node`, value: 100 },
       };
 
       setNodes((nds) => [...nds, newNode]);
@@ -65,8 +211,6 @@ export default function FlowEditor() {
 
   const onSelectionChange = useCallback(({ nodes, edges }) => {
     setSelectedElements({ nodes, edges });
-    console.log("Selected Nodes:", nodes);
-    console.log("Selected Edges:", edges);
   }, []);
 
   useEffect(() => {
@@ -91,33 +235,137 @@ export default function FlowEditor() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedElements]);
 
+  const save = () => {
+    setShowSidebar(false);
+    async function editGraph() {
+      const canvas = document.querySelector("#reactFlow");
+      if (!canvas) return;
+      await new Promise((res) => requestAnimationFrame(res));
+      const dataUrl = await domtoimage.toPng(canvas, {
+        bgcolor: "#fff",
+        width: canvas.scrollWidth,
+        height: canvas.scrollHeight,
+        style: {
+          transform: "scale(1)",
+        },
+      });
+      let access = localStorage.getItem("access token");
+
+      let res = await fetch("http://127.0.0.1:8000/api/graph", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${access}`,
+        },
+        body: JSON.stringify({
+          id: id,
+          name: graphName,
+          data: {
+            nodes: nodes,
+            edges: edges,
+            snapshot: dataUrl,
+            viewport: {
+              x: 0,
+              y: 0,
+              zoom: 1,
+            },
+          },
+        }),
+      });
+
+      if (res.status === 401) {
+        const refresh = localStorage.getItem("refresh token");
+
+        const refreshRes = await fetch(
+          "http://127.0.0.1:8000/api/token/refresh",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ refresh }),
+          }
+        );
+
+        if (refreshRes.status === 400 || refreshRes.status === 401) {
+          localStorage.removeItem("access token");
+          localStorage.removeItem("refresh token");
+          navigate("/");
+        }
+
+        const refreshData = await refreshRes.json();
+
+        if (refreshData.access) {
+          localStorage.setItem("access token", refreshData.access);
+
+          res = await fetch("http://127.0.0.1:8000/api/graph", {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${access}`,
+            },
+            body: JSON.stringify({
+              id: id,
+              name: graphName,
+              data: {
+                nodes: nodes,
+                edges: edges,
+                snapshot: dataUrl,
+                viewport: {
+                  x: 0,
+                  y: 0,
+                  zoom: 1,
+                },
+              },
+            }),
+          });
+        } else {
+          console.error("Refresh token invalid or expired");
+        }
+      }
+      return await res.json();
+    }
+    editGraph().then(() => navigate("/dashboard"));
+  };
+
   return (
-    <div className="flex w-screen h-screen">
-      {showSidebar && <Sidebar />}
-      <div
-        onDrop={onDrop}
-        onDragOver={(e) => e.preventDefault()}
-        className="flex w-screen h-screen"
-      >
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          nodeTypes={nodeTypes}
-          fitView
-          onSelectionChange={onSelectionChange}
-          translateExtent={[
-            [0, 0],
-            [8000, 8000],
-          ]}
+    <FlowContext.Provider value={{ setNodes, setEdges, setSelectedElements }}>
+      <div className="flex w-screen h-screen">
+        {showSidebar && <Sidebar />}
+        <div
+          onDrop={onDrop}
+          onDragOver={(e) => e.preventDefault()}
+          className="flex w-screen h-screen bg-[#FFF]"
+          id="reactFlow"
+          ref={ref}
         >
-          <Background />
-          <Controls />
-          <SidebarButton setShowSidebar={setShowSidebar} />
-        </ReactFlow>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            nodeTypes={nodeTypes}
+            fitView
+            onSelectionChange={onSelectionChange}
+            translateExtent={[
+              [0, 0],
+              [8000, 8000],
+            ]}
+          >
+            <Background />
+            <Controls />
+            <SidebarButton setShowSidebar={setShowSidebar} />
+            <HomeButton />
+            <GraphName
+              name={graphName}
+              setName={setGraphName}
+              setSelectedElements={onSelectionChange}
+            />
+            <SaveButton save={save} />
+          </ReactFlow>
+        </div>
       </div>
-    </div>
+    </FlowContext.Provider>
   );
 }

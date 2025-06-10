@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function SignUp() {
+export default function SignIn() {
   const navigate = useNavigate();
-  const [error, setError] = useState("")
+  const [error, setError] = useState("");
   return (
     <form
       style={{
@@ -17,7 +17,7 @@ export default function SignUp() {
         e.preventDefault();
         const username = e.target.elements.user.value;
         const password = e.target.elements.password.value;
-        fetch("http://127.0.0.1:8000/api/user", {
+        fetch("http://127.0.0.1:8000/api/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -33,12 +33,11 @@ export default function SignUp() {
               localStorage.setItem("access token", data.access);
               localStorage.setItem("refresh token", data.refresh);
               navigate("/");
-            } else if (data.username) {
-              setError("Username already exists.");
             } else {
-              setError("Something went wrong. Please try again.");
+              setError("Invalid username or password");
             }
           })
+          .catch(() => setError("Server error. Please try again."));
       }}
     >
       <div
@@ -52,7 +51,7 @@ export default function SignUp() {
         }}
       >
         <h1 className="h-[4rem] text-transparent bg-clip-text bg-gradient-to-r from-[#0F0] to-[#00F]">
-          Sign up
+          Sign in
         </h1>
         <label
           htmlFor="user"
@@ -97,9 +96,9 @@ export default function SignUp() {
           }}
         >
           <button className="mt-[3rem] bg-[#257DD6] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 hover:bg-[#0F0]">
-            Sign up
+            Sign in
           </button>
-          <a href="/signin">Have an account?</a>
+          <a href="/signup">Don't have an account?</a>
         </div>
       </div>
     </form>

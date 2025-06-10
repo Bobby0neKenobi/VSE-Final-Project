@@ -7,7 +7,7 @@ import { ReactFlowProvider } from "reactflow";
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <ReactFlowProvider>
-        <App />
+      <App />
     </ReactFlowProvider>
   </StrictMode>
 );
