@@ -20,7 +20,12 @@ export default function ResistorNode({ data, selected, id }) {
         <input
           type="text"
           value={value}
-          onChange={(e) => setValue(Math.max(1, Number(e.target.value)))}
+          onChange={(e) => {
+            setValue(Math.max(1, Number(e.target.value)));
+            setNodes((nodes) =>
+              nodes.map((n) => (n.id === id ? { ...n, data: {label: "resistor node", value: Number(e.target.value)} } : n))
+            );
+          }}
           className="w-[60px] p-[4px] text-[14px] mr-[4px] text-center"
         />
         Ω

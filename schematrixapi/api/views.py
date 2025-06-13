@@ -28,10 +28,30 @@ def calculate_total_resistance(nodes, edges):
     visited = set()
     print(battery_node["id"])
 
+    def getNodeType(node_id):
+        for i in range(len(nodes)):
+            if nodes[i]["id"] == node_id:
+                return nodes[i]["type"]
+    
+    def getResistance(node_id):
+        visited.add(node_id)
+        Rn = 0
+        for n_id in graphtarg[node_id]:
+            R = rec(n_id)
+            if Rn == 0:
+                Rn = R
+                continue
+            Rn = (Rn * R) / (Rn + R)
+        return Rn
+
     def rec(node_id):
         Res = 0
+        for i in range(len(nodes)):
+            if nodes[i]["id"] == node_id and node_id not in visited:
+                Res = nodes[i]["data"]["value"]
+                visited.add(node_id)
+                break
         while True:
-            visited.add(node_id)
             Rn = 0
             if len(graphtarg[node_id]) > 1:
                 for n_id in graphtarg[node_id]:
@@ -39,24 +59,27 @@ def calculate_total_resistance(nodes, edges):
                     if Rn == 0:
                         Rn = R
                         continue
-                    Rn = (Rn * R)/(Rn + R)
+                    Rn = (Rn * R) / (Rn + R)
             else:
-                Rn = nodes[next((i for i, node in enumerate(nodes) if node["id"] == graphtarg[graphtarg[node_id][0]][0]), -1)]["data"]["value"]
-
-
+                for i in range(len(nodes)):
+                    if nodes[i]["id"] == graphtarg[node_id][0] and graphtarg[node_id][0] not in visited:
+                        Rn = nodes[i]["data"]["value"]
+                        break
             # Calc resistor sum
             Res = Res + Rn
-            
+
+            visited.add(node_id)
             if len(visited) == len(nodes):
                 break
             else:
                 if len(graphtarg[graphtarg[node_id][0]]) == 1:
                     if len(graphsour[graphtarg[node_id][0]]) > 1:
                         break
+
             node_id = graphtarg[node_id][0]
         return Res
 
-    return rec(battery_node["id"])
+    return getResistance(battery_node["id"])
 
 
 class LoginView(TokenObtainPairView):

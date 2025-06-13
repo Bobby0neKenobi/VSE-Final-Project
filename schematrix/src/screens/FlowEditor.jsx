@@ -98,7 +98,7 @@ export default function FlowEditor() {
   const onConnect = useCallback(
     (params) =>
       setEdges((eds) =>
-        addEdge({ ...params, type: "smoothstep" /*, label: "I = "*/ }, eds)
+        addEdge({ ...params, type: "smoothstep" }, eds)
       ),
     []
   );
