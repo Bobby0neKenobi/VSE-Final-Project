@@ -38,8 +38,14 @@ function isCircuitComplete(nodes, edges) {
   edges.forEach((edge) => {
     const a = edge.source;
     const b = edge.target;
-    if (!graph[a]){graph[a] = []; length ++;}
-    if (!graph[b]){graph[b] = []; length ++;}
+    if (!graph[a]) {
+      graph[a] = [];
+      length++;
+    }
+    if (!graph[b]) {
+      graph[b] = [];
+      length++;
+    }
     graph[a].push(b);
     graph[b].push(a);
   });
@@ -48,7 +54,6 @@ function isCircuitComplete(nodes, edges) {
   let valid = false;
 
   function dfs(nodeId, cameFrom) {
-    
     if (nodeId === negHandle && foundResistor) {
       valid = true;
       return;
@@ -57,7 +62,7 @@ function isCircuitComplete(nodes, edges) {
     visited.add(nodeId);
 
     const node = nodes.find((n) => n.id === nodeId);
-    
+
     if (node && node.type === "resistor") foundResistor = true;
 
     for (const neighbor of graph[nodeId] || []) {
@@ -68,8 +73,6 @@ function isCircuitComplete(nodes, edges) {
   dfs(posHandle, null);
   return valid;
 }
-
-
 
 export default function FlowEditor() {
   const navigate = useNavigate();
@@ -89,7 +92,7 @@ export default function FlowEditor() {
   const [graphName, setGraphName] = useState(name);
   const [showSidebar, setShowSidebar] = useState(false);
   const ref = useRef();
-  console.log(nodes, edges)
+  console.log(nodes, edges);
 
   useEffect(() => {
     window.focus();
@@ -97,9 +100,7 @@ export default function FlowEditor() {
 
   const onConnect = useCallback(
     (params) =>
-      setEdges((eds) =>
-        addEdge({ ...params, type: "smoothstep" }, eds)
-      ),
+      setEdges((eds) => addEdge({ ...params, type: "smoothstep" }, eds)),
     []
   );
 
@@ -140,11 +141,9 @@ export default function FlowEditor() {
             )
           );
         } else {
-          setNodes((nds) =>
-            nds.filter(
-              (nd) => !selectedElements.nodes.find((n) => n.id === nd.id)
-            )
-          );
+          let node_id = selectedElements.nodes[0].id;
+          setNodes((nds) => nds.filter((nd) => nd.id !== node_id));
+          setEdges((edg) => edg.filter((ed) => (ed.target !== node_id && ed.source !== node_id)));
         }
       }
     };
@@ -246,7 +245,16 @@ export default function FlowEditor() {
   };
 
   return (
-    <FlowContext.Provider value={{ edges, nodes, setNodes, setEdges, setSelectedElements, isCircuitComplete }}>
+    <FlowContext.Provider
+      value={{
+        edges,
+        nodes,
+        setNodes,
+        setEdges,
+        setSelectedElements,
+        isCircuitComplete,
+      }}
+    >
       <div className="flex w-screen h-screen">
         {showSidebar && <Sidebar />}
         <div
